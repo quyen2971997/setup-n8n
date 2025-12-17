@@ -2,7 +2,8 @@
 
 # === Configuration ===
 # N8N Data Directory (relative to the user running the script, e.g., /root/n8n-data if run as root)
-N8N_BASE_DIR="$HOME/n8n" # You can change this path if desired
+ROOT_DIR="$PWD"
+N8N_BASE_DIR="$ROOT_DIR/n8n" # You can change this path if desired
 N8N_VOLUME_DIR="$N8N_BASE_DIR/n8n_data"
 DOCKER_COMPOSE_FILE="$N8N_BASE_DIR/docker-compose.yml"
 # Cloudflared config file path
@@ -11,12 +12,11 @@ CLOUDFLARED_CONFIG_FILE="/etc/cloudflared/config.yml"
 DEFAULT_TZ="UTC"
 
 # Backup configuration
-BACKUP_DIR="$HOME/n8n-backups"
+BACKUP_DIR="$ROOT_DIR/n8n-backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
 # Config file for installation settings
-CONFIG_FILE="$HOME/.n8n_install_config"
-
+CONFIG_FILE="$ROOT_DIR/.n8n_install_config"
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -598,7 +598,7 @@ create_backup() {
     tar -czf "$BACKUP_DIR/$BACKUP_FILE" \
         -C "$(dirname "$N8N_BASE_DIR")" "$(basename "$N8N_BASE_DIR")" \
         -C /etc cloudflared/ \
-        -C "$HOME" install_n8n.sh \
+        -C "$ROOT_DIR" install_n8n.sh \
         2>/dev/null || true
     
     BACKUP_SIZE=$(du -sh "$BACKUP_DIR/$BACKUP_FILE" | cut -f1)
@@ -834,7 +834,8 @@ services:
       # - WEBHOOK_URL=https://$CF_HOSTNAME/ # Optional: Base URL for webhooks
     volumes:
       # Mount the local data directory into the container
-      - ./n8n_local_data:/home/node/.n8n
+      # - ./n8n_local_data:/home/node/.n8n
+      - ./n8n_local_data:/home/ubuntu/.n8n
 
 networks:
   default:
@@ -847,6 +848,8 @@ EOF
     echo ">>> Configuring Cloudflared..."
     # Create directory if it doesn't exist
     mkdir -p /etc/cloudflared
+    # Make sure any existing service is cleaned up first
+    cloudflared service uninstall || true
 
     # Create cloudflared config.yml
     echo ">>> Creating Cloudflared config file: $CLOUDFLARED_CONFIG_FILE"
@@ -880,6 +883,11 @@ EOF
     systemctl status cloudflared --no-pager || echo "Warning: Cloudflared status check indicates an issue. Use 'sudo journalctl -u cloudflared' for details."
 
     echo ">>> Starting n8n container via Docker Compose..."
+    # First, ensure any existing containers are stopped
+    docker compose -f "$DOCKER_COMPOSE_FILE" down || true
+    # Echo docker compose file location for clarity
+    echo ">>> Using Docker Compose file at: $DOCKER_COMPOSE_FILE"
+
     # Use -f to specify the file, ensuring it runs from anywhere
     # Use --remove-orphans to clean up any old containers if the compose file changed significantly
     # Use -d to run in detached mode
@@ -900,7 +908,7 @@ EOF
     echo "- If you encounter issues, check the n8n container logs: 'docker logs n8n'"
     echo "- Check Cloudflared service logs: 'sudo journalctl -u cloudflared -f'"
     echo "- Ensure DNS for ${CF_HOSTNAME} is correctly pointing to your Cloudflare Tunnel (usually handled automatically by Cloudflare)."
-    echo "- Remember to log out and log back in if user '$REAL_USER' was just added to the 'docker' group."
+    echo "- Remember to log out and log back in if user 'REAL_USER' was just added to the 'docker' group."
     echo ""
     echo "🔧 Additional Commands:"
     echo "- Backup N8N: $0 backup"
