@@ -8,7 +8,7 @@ DOCKER_COMPOSE_FILE="$N8N_BASE_DIR/docker-compose.yml"
 # Cloudflared config file path
 CLOUDFLARED_CONFIG_FILE="/etc/cloudflared/config.yml"
 # Default Timezone if system TZ is not set
-DEFAULT_TZ="Asia/Ho_Chi_Minh"
+DEFAULT_TZ="UTC"
 
 # Backup configuration
 BACKUP_DIR="$HOME/n8n-backups"
