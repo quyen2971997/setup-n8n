@@ -790,9 +790,9 @@ install_n8n() {
     # --- Install Cloudflared ---
     if ! command -v cloudflared &> /dev/null; then
         echo ">>> Cloudflared not found. Installing Cloudflared..."
-        # Download the ARM64 package
-        CLOUDFLARED_DEB_URL="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64.deb"
-        CLOUDFLARED_DEB_PATH="/tmp/cloudflared-linux-arm64.deb"
+        # Download the AMD64 package
+        CLOUDFLARED_DEB_URL="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb"
+        CLOUDFLARED_DEB_PATH="/tmp/cloudflared-linux-amd64.deb"
         echo ">>> Downloading Cloudflared package from $CLOUDFLARED_DEB_URL..."
         wget -q "$CLOUDFLARED_DEB_URL" -O "$CLOUDFLARED_DEB_PATH"
         echo ">>> Installing Cloudflared package..."
