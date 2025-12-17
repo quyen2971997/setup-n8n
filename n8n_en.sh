@@ -810,6 +810,7 @@ install_n8n() {
     # This prevents permission errors when n8n tries to write data
     echo ">>> Setting permissions for n8n data volume..."
     chown -R 1000:1000 "$N8N_VOLUME_DIR"
+    chmod -R 755 "$N8N_VOLUME_DIR"
 
     # --- Create Docker Compose File ---
     echo ">>> Creating Docker Compose file: $DOCKER_COMPOSE_FILE"
